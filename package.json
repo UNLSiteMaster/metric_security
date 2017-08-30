@@ -1,0 +1,6 @@
+{
+  "name": "web-security-checker",
+  "dependencies": {
+    "puppeteer": "^0.9.0"
+  }
+}
