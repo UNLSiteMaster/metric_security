@@ -49,21 +49,6 @@ class Metric extends MetricInterface
     }
 
     /**
-     * Determine if this metric should be graded as pass-fail
-     *
-     * @return bool True if pass-fail, False if normally graded
-     */
-    public function isPassFail()
-    {
-        if (isset($this->options['pass_fail']) && $this->options['pass_fail'] == true) {
-            //Simulate a pass/fail metric grade
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
      * Scan a given URI and apply all marks to it.
      *
      * All that this
@@ -128,21 +113,5 @@ class Metric extends MetricInterface
         }
         
         return json_decode($result, true);
-    }
-
-
-    /**
-     * Get the help text for a mark by machine_name
-     *
-     * @param string $machine_name
-     * @return null|string
-     */
-    public function getHelpText($machine_name)
-    {
-        if (isset($this->options['help_text'][$machine_name])) {
-            return $this->options['help_text'][$machine_name];
-        }
-
-        return null;
     }
 }
