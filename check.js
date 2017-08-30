@@ -10,7 +10,7 @@ let results = {
 	'mixed_content': {
 		fail: false,
 		name: 'There should be no mixed content',
-		description: 'Insecure assets such as images, javascript, and css that are loaded https pages are considered to be mixed content. To fix this issue, change the URLs for these assets to use https.',
+		description: 'Insecure assets such as images, javascript, and css that are loaded on https pages are considered to be mixed content. To fix this issue, change the URLs for these assets to use https.',
 		data: []
 	},
 	'invalid_cert': {
