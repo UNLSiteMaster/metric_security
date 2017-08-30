@@ -20,7 +20,7 @@ class Metric extends MetricInterface
     {
         $options = array_replace_recursive([
             'help_text' => [],
-            'mark_machine_name_is_error' => ['title_exists', 'headings_exist'],
+            'mark_machine_name_is_error' => ['security_mixed_content_fail'],
         ], $options);
 
         parent::__construct($plugin_name, $options);
@@ -81,7 +81,7 @@ class Metric extends MetricInterface
         if (!$results = $this->run($uri)) {
             throw new RuntimeException('headless results are required for the seo metric');
         }
-        
+
         foreach ($results as $machine_name=>$details) {
             $machine_name = 'security_'.$machine_name.'_'.(($details['fail'])? 'fail': 'pass');
 
@@ -98,21 +98,17 @@ class Metric extends MetricInterface
             $mark = $this->getMark($machine_name, $details['name'], $point_deduction, $details['description']);
 
             $value_found = null;
-            
-            if (count($details['data']) == 1) {
-                $value_found = $details['data'][0];
-            } else if (count($details['data']) > 1) {
-                $value_found = '';
-                foreach ($details['data'] as $value) {
-                    $value_found .= '* ' . $value . PHP_EOL;
-                }
 
-                $value_found = trim($value_found);
+            if (!empty($details['data'])) {
+                //Add a mark for each instance
+                foreach ($details['data'] as $value) {
+                    $page->addMark($mark, array(
+                        'value_found' => $value,
+                    ));
+                }
+            } else {
+                $page->addMark($mark);
             }
-            
-            $page->addMark($mark, array(
-                'value_found' => $value_found,
-            ));
         }
 
         return true;
