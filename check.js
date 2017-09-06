@@ -1,8 +1,8 @@
 
-let args = process.argv.slice(2);
+let argv = require('minimist')(process.argv.slice(2));
 
 //Force the URL to https
-url = args[0];
+url = argv._[0];
 
 const puppeteer = require('puppeteer');
 
@@ -31,10 +31,16 @@ function isCertificateError(message) {
 	return message.startsWith('SSL Certificate error');
 }
 
-puppeteer.launch({headless: true}).then(async browser => {
+let options = {headless: true};
+
+if (argv.sandbox === 'false') {
+	options.args = ['--no-sandbox', '--disable-setuid-sandbox'];
+}
+
+puppeteer.launch().then(async browser => {
 	let page = await browser.newPage();
-	if (args[1]) {
-		page.setUserAgent(args[1]);
+	if (argv.ua) {
+		page.setUserAgent(argv.ua);
 	}
 
 	//Listen to all requests
