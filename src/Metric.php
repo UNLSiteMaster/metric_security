@@ -1,12 +1,9 @@
 <?php
 namespace SiteMaster\Plugins\Metric_security;
 
-use HtmlValidator\Validator;
 use SiteMaster\Core\Auditor\Logger\Metrics;
 use SiteMaster\Core\Auditor\MetricInterface;
 use SiteMaster\Core\Config;
-use SiteMaster\Core\Registry\Site;
-use SiteMaster\Core\Auditor\Scan;
 use SiteMaster\Core\Auditor\Site\Page;
 use SiteMaster\Core\RuntimeException;
 
@@ -21,6 +18,8 @@ class Metric extends MetricInterface
         $options = array_replace_recursive([
             'help_text' => [],
             'mark_machine_name_is_error' => ['security_mixed_content_fail'],
+            'execute_as_user' => false,
+            'sandbox' => true,
         ], $options);
 
         parent::__construct($plugin_name, $options);
@@ -100,12 +99,24 @@ class Metric extends MetricInterface
     }
     
     public function run($url) {
-        $command = 'timeout ' . escapeshellarg(Config::get('HEADLESS_TIMEOUT')) //Prevent excessively long runs
+        $command = '';
+        
+        if ($this->options['execute_as_user']) {
+            //This option allows executing as a specific user, which can sandbox the script.
+            $command .= 'sudo -u ' . escapeshellarg($this->options['execute_as_user']) . ' ';
+        }
+        
+        $command .= 'timeout ' . escapeshellarg(Config::get('HEADLESS_TIMEOUT')) //Prevent excessively long runs
             . ' ' . Config::get('PATH_NODE')
             . ' ' . __DIR__.'/../check.js'
-            . ' ' . escapeshellarg($url)
-            . ' ' . escapeshellarg(Config::get('USER_AGENT'));
-
+            . ' --ua ' . escapeshellarg(Config::get('USER_AGENT'));
+        
+        if (isset($this->options['sandbox']) && $this->options['sandbox'] === false) {
+            $command .= ' --sandbox=false';
+        }
+        
+        $command .= ' ' . escapeshellarg($url);
+        
         $result = shell_exec($command);
 
         if (!$result) {
@@ -113,5 +124,15 @@ class Metric extends MetricInterface
         }
         
         return json_decode($result, true);
+    }
+
+    /**
+     * Determine if this metric should be graded as pass-fail
+     *
+     * @return bool True if pass-fail, False if normally graded
+     */
+    public function isPassFail()
+    {
+        return true;
     }
 }
