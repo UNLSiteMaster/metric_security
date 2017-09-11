@@ -37,11 +37,16 @@ if (argv.sandbox === 'false') {
 	options.args = ['--no-sandbox', '--disable-setuid-sandbox'];
 }
 
-puppeteer.launch().then(async browser => {
+puppeteer.launch(options).then(async browser => {
 	let page = await browser.newPage();
 	if (argv.ua) {
 		page.setUserAgent(argv.ua);
 	}
+
+	page.on('dialog', async dialog => {
+		//Auto dismiss dialogs so that the process does not hang waiting on user input.
+		await dialog.dismiss();
+	});
 
 	//Listen to all requests
 	page.on('request', (request) => {
@@ -110,7 +115,7 @@ puppeteer.launch().then(async browser => {
 		}
 	}
 
-	//Let the page run for a bit
+	//Let the page run for a bit (so we get mixed content)
 	await page.waitFor(2500);
 
 	//Now close and print any errors
