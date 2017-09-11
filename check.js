@@ -1,8 +1,10 @@
 
 let argv = require('minimist')(process.argv.slice(2));
 
-//Force the URL to https
-url = argv._[0];
+const { URL } = require('url');
+
+//Convert to an absolute URL by default (for example, this will add a trailing slash after the domain if it wasn't provided)
+url = new URL(argv._[0]).href;
 
 const puppeteer = require('puppeteer');
 
@@ -51,7 +53,10 @@ puppeteer.launch(options).then(async browser => {
 	//Listen to all requests
 	page.on('request', (request) => {
 		//And catch those that are not https
-		if (page.url().startsWith('https://') && request.url.startsWith('http://')) {
+		if (page.url().startsWith('https://')
+			&& request.url.startsWith('http://')
+			&& request.url !== url //Don't record requests to html document as 'mixed content'
+		) {
 			results.mixed_content.fail = true;
 			results.mixed_content.data.push(request.url);
 		}
