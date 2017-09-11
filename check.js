@@ -55,7 +55,8 @@ puppeteer.launch(options).then(async browser => {
 		//And catch those that are not https
 		if (page.url().startsWith('https://')
 			&& request.url.startsWith('http://')
-			&& request.url !== url //Don't record requests to html document as 'mixed content'
+			//Don't record requests to html document as 'mixed content'
+			&& request.url.replace(/^https?:\/\//i, '//') !== page.url().replace(/^https?:\/\//i, '//')
 		) {
 			results.mixed_content.fail = true;
 			results.mixed_content.data.push(request.url);
