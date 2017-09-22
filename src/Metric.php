@@ -79,7 +79,7 @@ class Metric extends MetricInterface
                 $point_deduction = -1;
             }
 
-            $mark = $this->getMark($machine_name, $details['name'], $point_deduction, $details['description']);
+            $mark = $this->getMark($machine_name, $details['name'], $point_deduction, '', $details['description']);
 
             $value_found = null;
 
