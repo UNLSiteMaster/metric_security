@@ -17,7 +17,7 @@ class Metric extends MetricInterface
     {
         $options = array_replace_recursive([
             'help_text' => [],
-            'mark_machine_name_is_error' => ['security_mixed_content_fail'],
+            'mark_machine_name_is_error' => ['security_mixed_content_active_fail'],
             'execute_as_user' => false,
             'sandbox' => true,
         ], $options);
