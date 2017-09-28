@@ -9,10 +9,16 @@ url = new URL(argv._[0]).href;
 const puppeteer = require('puppeteer');
 
 let results = {
-	'mixed_content': {
+	'mixed_content_active': {
 		fail: false,
-		name: 'There should be no mixed content',
-		description: 'Insecure assets such as images, javascript, and css that are loaded on https pages are considered to be [mixed content](https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content). To fix this issue, change the URLs for these assets to use https. For more information on fixing mixed content, see the [guide on fixing mixed content from Google](https://developers.google.com/web/fundamentals/security/prevent-mixed-content/fixing-mixed-content).',
+		name: 'There must be no active mixed content',
+		description: 'Insecure assets such as javascript, iframes, and css that are loaded on https pages are considered to be [active mixed content](https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content). To fix this issue, change the URLs for these assets to use https. For more information on fixing mixed content, see the [guide on fixing mixed content from Google](https://developers.google.com/web/fundamentals/security/prevent-mixed-content/fixing-mixed-content).',
+		data: []
+	},
+	'mixed_content_passive': {
+		fail: false,
+		name: 'There should be no passive mixed content',
+		description: 'Insecure assets such as images, audio, and video that are loaded on https pages are considered to be [passive mixed content](https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content). These assets can lead to privacy issues, but are still loaded by browsers. To fix this issue, change the URLs for these assets to use https. For more information on fixing mixed content, see the [guide on fixing mixed content from Google](https://developers.google.com/web/fundamentals/security/prevent-mixed-content/fixing-mixed-content).',
 		data: []
 	},
 	'invalid_cert': {
@@ -51,15 +57,27 @@ puppeteer.launch(options).then(async browser => {
 	});
 
 	//Listen to all requests
-	page.on('request', (request) => {
+	page.on('requestfailed', (request) => {
 		//And catch those that are not https
 		if (page.url().startsWith('https://')
 			&& request.url.startsWith('http://')
 			//Don't record requests to html document as 'mixed content'
 			&& request.url.replace(/^https?:\/\//i, '//') !== page.url().replace(/^https?:\/\//i, '//')
 		) {
-			results.mixed_content.fail = true;
-			results.mixed_content.data.push(request.url);
+			results.mixed_content_active.fail = true;
+			results.mixed_content_active.data.push(request.url);
+		}
+	});
+
+	page.on('requestfinished', (request) => {
+		//And catch those that are not https
+		if (page.url().startsWith('https://')
+			&& request.url.startsWith('http://')
+			//Don't record requests to html document as 'mixed content'
+			&& request.url.replace(/^https?:\/\//i, '//') !== page.url().replace(/^https?:\/\//i, '//')
+		) {
+			results.mixed_content_passive.fail = true;
+			results.mixed_content_passive.data.push(request.url);
 		}
 	});
 
@@ -80,8 +98,10 @@ puppeteer.launch(options).then(async browser => {
 
 	if (!page.url().startsWith('https://')) {
 		//That page didn't auto-redirect to https, reset the results to clear errors from the http request
-		results.mixed_content.data = [];
-		results.mixed_content.fail = false;
+		results.mixed_content_active.data = [];
+		results.mixed_content_active.fail = false;
+		results.mixed_content_passive.data = [];
+		results.mixed_content_passive.fail = false;
 
 		//Add a failure
 		results.not_https_by_default.fail = true;
