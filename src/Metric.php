@@ -63,7 +63,7 @@ class Metric extends MetricInterface
     public function scan($uri, \DOMXPath $xpath, $depth, Page $page, Metrics $context)
     {
         if (!$results = $this->run($uri)) {
-            throw new RuntimeException('headless results are required for the seo metric');
+            throw new RuntimeException('headless results are required for the security metric');
         }
 
         foreach ($results as $machine_name=>$details) {
