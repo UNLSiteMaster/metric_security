@@ -5,6 +5,7 @@
 ```
 npm install puppeteer minimist
 ```
+Note: Puppeteer and minimist are now part of sitemaster base and only need to be installed if running standalone. Also requires puppeteer ^5.4.0 which requires node.js version of at least v15.
 
 ## About
 

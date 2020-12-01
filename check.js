@@ -60,24 +60,24 @@ puppeteer.launch(options).then(async browser => {
 	page.on('requestfailed', (request) => {
 		//And catch those that are not https
 		if (page.url().startsWith('https://')
-			&& request.url.startsWith('http://')
+			&& request.url().startsWith('http://')
 			//Don't record requests to html document as 'mixed content'
-			&& request.url.replace(/^https?:\/\//i, '//') !== page.url().replace(/^https?:\/\//i, '//')
+			&& request.url().replace(/^https?:\/\//i, '//') !== page.url().replace(/^https?:\/\//i, '//')
 		) {
 			results.mixed_content_active.fail = true;
-			results.mixed_content_active.data.push(request.url);
+			results.mixed_content_active.data.push(request.url());
 		}
 	});
 
 	page.on('requestfinished', (request) => {
 		//And catch those that are not https
 		if (page.url().startsWith('https://')
-			&& request.url.startsWith('http://')
+			&& request.url().startsWith('http://')
 			//Don't record requests to html document as 'mixed content'
-			&& request.url.replace(/^https?:\/\//i, '//') !== page.url().replace(/^https?:\/\//i, '//')
+			&& request.url().replace(/^https?:\/\//i, '//') !== page.url().replace(/^https?:\/\//i, '//')
 		) {
 			results.mixed_content_passive.fail = true;
-			results.mixed_content_passive.data.push(request.url);
+			results.mixed_content_passive.data.push(request.url());
 		}
 	});
 
@@ -142,7 +142,7 @@ puppeteer.launch(options).then(async browser => {
 	}
 
 	//Let the page run for a bit (so we get mixed content)
-	await page.waitFor(2500);
+	await page.waitForTimeout(2500);
 
 	//Now close and print any errors
 	browser.close();
